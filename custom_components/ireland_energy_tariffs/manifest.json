@@ -1,0 +1,8 @@
+{
+  "domain": "ireland_energy_tariffs",
+  "name": "Ireland Energy Tariffs",
+  "version": "2.0.0",
+  "config_flow": true,
+  "documentation": "https://github.com/d4diaz/ireland_energy_tariffs",
+  "iot_class": "local_polling"
+}
