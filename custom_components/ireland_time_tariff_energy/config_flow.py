@@ -231,3 +231,13 @@ vol.Required("grid_import_sensor"): selector.EntitySelector(
     )
 )
 entry.data["grid_import_sensor"]
+
+vol.Optional("battery_discharge_sensor"):
+    selector.EntitySelector(
+        selector.EntitySelectorConfig(
+            domain="sensor",
+            device_class="energy"
+        )
+    )
+entry.data["battery_discharge_sensor"]
+
