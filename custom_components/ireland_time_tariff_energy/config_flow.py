@@ -44,11 +44,8 @@ class IrelandTimeTariffConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         self._data = {}
 
-    # ---------------------------
-    # STEP 1 – SUPPLIER
-    # ---------------------------
     async def async_step_user(self, user_input=None):
-        if user_input is not None:
+        if user_input:
             supplier = user_input["supplier"]
             self._data["supplier"] = supplier
 
@@ -61,18 +58,12 @@ class IrelandTimeTariffConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema({
                 vol.Required("supplier", default="Electric Ireland"):
-                    vol.In(list(SUPPLIER_PRESETS.keys()) + ["Other / Custom"])
+                    vol.In(list(SUPPLIER_PRESETS) + ["Other / Custom"])
             }),
-            description_placeholders={
-                "info": "Choose your electricity supplier. Tariffs can be customised later."
-            },
         )
 
-    # ---------------------------
-    # STEP 2 – ENERGY SENSORS
-    # ---------------------------
     async def async_step_energy(self, user_input=None):
-        if user_input is not None:
+        if user_input:
             self._data.update(user_input)
             return self.async_create_entry(
                 title="Ireland Time-Based Energy Tariffs",
@@ -96,5 +87,35 @@ class IrelandTimeTariffConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             device_class="energy"
                         )
                     ),
+            }),
+        )
+
+    @staticmethod
+    def async_get_options_flow(config_entry):
+        return IrelandTimeTariffOptionsFlow(config_entry)
+
+
+class IrelandTimeTariffOptionsFlow(config_entries.OptionsFlow):
+    def __init__(self, entry):
+        self.entry = entry
+
+    async def async_step_init(self, user_input=None):
+        if user_input:
+            return self.async_create_entry(title="", data=user_input)
+
+        def opt(key, default):
+            return self.entry.options.get(key, self.entry.data.get(key, default))
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required("import_day_rate", default=opt("import_day_rate", 0.30)):
+                    vol.Coerce(float),
+                vol.Required("import_night_rate", default=opt("import_night_rate", 0.15)):
+                    vol.Coerce(float),
+                vol.Required("import_peak_rate", default=opt("import_peak_rate", 0.45)):
+                    vol.Coerce(float),
+                vol.Required("export_day_rate", default=opt("export_day_rate", 0.18)):
+                    vol.Coerce(float),
             }),
         )
